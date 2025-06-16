@@ -1,6 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { HttpServerTransport } from "@modelcontextprotocol/sdk/server/http.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { Gitlab } from "@gitbeaker/rest";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -325,7 +324,7 @@ server.tool(
 // Connect the server to a transport and start it
 (async () => {
   try {
-    const transport = new HttpServerTransport({
+    const transport = new StreamableHTTPServerTransport({
       host: "0.0.0.0",
       port: 8080,
     });
