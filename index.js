@@ -329,6 +329,7 @@ server.tool(
       port: 8080,
     });
     await server.connect(transport);
+    console.log("Server running...")
   } catch (error) {
     console.error("Failed to start server:", error.message);
     process.exit(1);
