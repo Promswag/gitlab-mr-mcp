@@ -118,15 +118,7 @@ app.post('/mcp', async (req, res) => {
             content: [{ type: 'text', text: projectsText }],
           };
         } catch (error: unknown) {
-          // const err = error as Error;
           return formatErrorResponse(error as Error);
-          // return {
-          //   content: [{
-          //     type: "text",
-          //     text: `Error: ${err.message}`
-          //   }],
-          //   isError: true
-          // };
         }
       }
     );
