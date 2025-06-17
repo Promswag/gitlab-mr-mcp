@@ -48,6 +48,7 @@ npm install
 ```
 
 3. Add the following to your MCP client configuration:
+
 ```json
 {
   "mcpServers": {
@@ -65,34 +66,34 @@ npm install
 
 ## 🛠️ Available Tools
 
-* `get_projects`
+- `get_projects`
   Gets a list of GitLab projects accessible with your token.
 
-* `list_open_merge_requests`
+- `list_open_merge_requests`
   Lists all open merge requests in the specified project.
 
-* `get_merge_request_details`
+- `get_merge_request_details`
   Gets detailed information about a specific merge request.
 
-* `get_merge_request_comments`
+- `get_merge_request_comments`
   Gets comments from a specific merge request, including discussion notes and diff notes.
 
-* `add_merge_request_comment`
+- `add_merge_request_comment`
   Adds a general comment to a merge request.
 
-* `add_merge_request_diff_comment`
+- `add_merge_request_diff_comment`
   Adds a comment to a specific line in a file within a merge request.
 
-* `get_merge_request_diff`
+- `get_merge_request_diff`
   Gets the diff for a merge request.
 
-* `get_issue_details`
+- `get_issue_details`
   Gets detailed information about a specific issue.
 
-* `set_merge_request_title`
+- `set_merge_request_title`
   Set the title of a merge request
 
-* `set_merge_request_description`
+- `set_merge_request_description`
   Set the description of a merge request
 
 ## 🏗️ Development
@@ -108,8 +109,8 @@ export MR_MCP_GITLAB_HOST=your_gitlab_host
 # Optional evn vars to filter the projects the `get_projects` tool has access to:
 # https://docs.gitlab.com/api/access_requests/#valid-access-levels
 export MR_MCP_MIN_ACCESS_LEVEL=min_access_level
-# Search term that should match the project path or name 
-export MR_MCP_PROJECT_SEARCH_TERM=term 
+# Search term that should match the project path or name
+export MR_MCP_PROJECT_SEARCH_TERM=term
 ```
 
 For use with MCP clients, you can run:
@@ -133,4 +134,3 @@ If you encounter permissions issues (403 Forbidden), check:
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
-
