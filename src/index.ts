@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { Gitlab } from '@gitbeaker/rest';
-import { authenticateJWT } from './authMiddleware';
+import { authenticateJWT } from './authMiddleware.js';
 import { z } from 'zod';
 
 const GITLAB_TOKEN = process.env.REMOTE_GITLAB_MCP_GITLAB_TOKEN;
@@ -28,11 +28,11 @@ app.use(express.json(), authenticateJWT);
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
 // Helper function to format errors for MCP responses
-const formatErrorResponse = (error) => ({
+const formatErrorResponse = (error: Error): any => ({
   content: [
     {
       type: 'text',
-      text: `Error: ${error.message} - ${error.cause?.description || 'No additional details'}`,
+      text: `Error: ${error.message}}`,
     },
   ],
   isError: true,
@@ -84,11 +84,11 @@ app.post('/mcp', async (req, res) => {
           const projectFilter = {
             ...(process.env.MR_MCP_MIN_ACCESS_LEVEL
               ? {
-                  minAccessLevel: parseInt(
-                    process.env.MR_MCP_MIN_ACCESS_LEVEL,
-                    10
-                  ),
-                }
+                minAccessLevel: parseInt(
+                  process.env.MR_MCP_MIN_ACCESS_LEVEL,
+                  10
+                ),
+              }
               : {}),
             ...(process.env.MR_MCP_PROJECT_SEARCH_TERM
               ? { search: process.env.MR_MCP_PROJECT_SEARCH_TERM }
@@ -101,14 +101,14 @@ app.post('/mcp', async (req, res) => {
           const filteredProjects = verbose
             ? projects
             : projects.map((project) => ({
-                id: project.id,
-                description: project.description,
-                name: project.name,
-                path: project.path,
-                path_with_namespace: project.path_with_namespace,
-                web_url: project.web_url,
-                default_branch: project.default_branch,
-              }));
+              id: project.id,
+              description: project.description,
+              name: project.name,
+              path: project.path,
+              path_with_namespace: project.path_with_namespace,
+              web_url: project.web_url,
+              default_branch: project.default_branch,
+            }));
 
           const projectsText =
             Array.isArray(filteredProjects) && filteredProjects.length > 0
@@ -117,8 +117,16 @@ app.post('/mcp', async (req, res) => {
           return {
             content: [{ type: 'text', text: projectsText }],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          // const err = error as Error;
+          return formatErrorResponse(error as Error);
+          // return {
+          //   content: [{
+          //     type: "text",
+          //     text: `Error: ${err.message}`
+          //   }],
+          //   isError: true
+          // };
         }
       }
     );
@@ -145,13 +153,13 @@ app.post('/mcp', async (req, res) => {
           const filteredMergeRequests = verbose
             ? mergeRequests
             : mergeRequests.map((mr) => ({
-                iid: mr.iid,
-                project_id: mr.project_id,
-                title: mr.title,
-                description: mr.description,
-                state: mr.state,
-                web_url: mr.web_url,
-              }));
+              iid: mr.iid,
+              project_id: mr.project_id,
+              title: mr.title,
+              description: mr.description,
+              state: mr.state,
+              web_url: mr.web_url,
+            }));
           return {
             content: [
               {
@@ -160,8 +168,8 @@ app.post('/mcp', async (req, res) => {
               },
             ],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -190,23 +198,23 @@ app.post('/mcp', async (req, res) => {
           const filteredMr = verbose
             ? mr
             : {
-                title: mr.title,
-                description: mr.description,
-                state: mr.state,
-                web_url: mr.web_url,
-                target_branch: mr.target_branch,
-                source_branch: mr.source_branch,
-                merge_status: mr.merge_status,
-                detailed_merge_status: mr.detailed_merge_status,
-                diff_refs: mr.diff_refs,
-              };
+              title: mr.title,
+              description: mr.description,
+              state: mr.state,
+              web_url: mr.web_url,
+              target_branch: mr.target_branch,
+              source_branch: mr.source_branch,
+              merge_status: mr.merge_status,
+              detailed_merge_status: mr.detailed_merge_status,
+              diff_refs: mr.diff_refs,
+            };
           return {
             content: [
               { type: 'text', text: JSON.stringify(filteredMr, null, 2) },
             ],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -242,7 +250,7 @@ app.post('/mcp', async (req, res) => {
           }
 
           const unresolvedNotes = discussions
-            .flatMap((note) => note.notes)
+            .flatMap((note) => note.notes ?? [])
             .filter((note) => note.resolved === false);
           const disscussionNotes = unresolvedNotes
             .filter((note) => note.type === 'DiscussionNote')
@@ -276,8 +284,8 @@ app.post('/mcp', async (req, res) => {
               },
             ],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -302,8 +310,8 @@ app.post('/mcp', async (req, res) => {
           return {
             content: [{ type: 'text', text: JSON.stringify(note, null, 2) }],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -344,13 +352,13 @@ app.post('/mcp', async (req, res) => {
             comment,
             {
               position: {
-                base_sha: base_sha,
-                start_sha: start_sha,
-                head_sha: head_sha,
-                old_path: file_path,
-                new_path: file_path,
-                position_type: 'text',
-                new_line: line_number,
+                baseSha: base_sha,
+                startSha: start_sha,
+                headSha: head_sha,
+                oldPath: file_path,
+                newPath: file_path,
+                positionType: 'text',
+                newLine: line_number,
               },
             }
           );
@@ -359,8 +367,8 @@ app.post('/mcp', async (req, res) => {
               { type: 'text', text: JSON.stringify(discussion, null, 2) },
             ],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -387,8 +395,8 @@ app.post('/mcp', async (req, res) => {
           return {
             content: [{ type: 'text', text: diffText }],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -417,17 +425,17 @@ app.post('/mcp', async (req, res) => {
           const filteredIssue = verbose
             ? issue
             : {
-                title: issue.title,
-                description: issue.description,
-              };
+              title: issue.title,
+              description: issue.description,
+            };
 
           return {
             content: [
               { type: 'text', text: JSON.stringify(filteredIssue, null, 2) },
             ],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -452,8 +460,8 @@ app.post('/mcp', async (req, res) => {
           return {
             content: [{ type: 'text', text: JSON.stringify(mr, null, 2) }],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );
@@ -478,8 +486,8 @@ app.post('/mcp', async (req, res) => {
           return {
             content: [{ type: 'text', text: JSON.stringify(mr, null, 2) }],
           };
-        } catch (error) {
-          return formatErrorResponse(error);
+        } catch (error: unknown) {
+          return formatErrorResponse(error as Error);
         }
       }
     );

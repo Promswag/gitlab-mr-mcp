@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import fs from 'fs';
-import path from 'path';
 import { fileURLToPath } from 'url';
 
 const AUTH_KEY_PATH = process.env.REMOTE_GITLAB_MCP_AUTH_KEY_PATH;
