@@ -14,7 +14,7 @@ if (!GITLAB_TOKEN) {
   );
 }
 const GITLAB_HOST =
-  process.env.REMOTE_GITLAB_MCP_GITLAB_HOST || 'https://gitlab.com';
+  process.env.REMOTE_GITLAB_MCP_GITLAB_HOSTNAME || 'https://gitlab.com';
 
 const api = new Gitlab({
   host: GITLAB_HOST,
@@ -23,6 +23,16 @@ const api = new Gitlab({
 
 const app = express();
 app.use(express.json(), authenticateJWT);
+
+const wrapper = express();
+
+wrapper.get('/gitlab/ping', async(req, res) => {
+  res.send("pong")
+})
+wrapper.use('/gitlab', app)
+wrapper.use((req, res) => {
+  res.status(404).send('Nothing to see here...');
+});
 
 // Map to store transports by session ID
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
@@ -39,7 +49,7 @@ const formatErrorResponse = (error: Error): any => ({
 });
 
 // Handle POST requests for client-to-server communication
-app.post('/mcp', async (req, res) => {
+app.post('/', async (req, res) => {
   // Check for existing session ID
   const sessionId = req.headers['mcp-session-id'] as string | undefined;
   let transport: StreamableHTTPServerTransport;
@@ -519,16 +529,16 @@ const handleSessionRequest = async (
 };
 
 // Handle GET requests for server-to-client notifications via SSE
-app.get('/mcp', handleSessionRequest);
+app.get('/', handleSessionRequest);
 
 // Handle DELETE requests for session termination
-app.delete('/mcp', handleSessionRequest);
+app.delete('/', handleSessionRequest);
 
 const PORT = parseInt(process.env.REMOTE_GITLAB_MCP_SERVER_PORT || '3000');
-const HOSTNAME = process.env.REMOTE_GITLAB_MCP_SERVER_HOSTNAME || 'localhost';
+const HOSTNAME = process.env.REMOTE_GITLAB_MCP_SERVER_HOSTNAME || '0.0.0.0';
 const BACKLOG = parseInt(process.env.REMOTE_GITLAB_MCP_SERVER_BACKLOG || '32');
 
-app.listen(PORT, HOSTNAME, BACKLOG, () => {
+wrapper.listen(PORT, HOSTNAME, BACKLOG, () => {
   console.log(
     `Remote Gitlab MCP Streamable HTTP Server listening on ${HOSTNAME}:${PORT}`
   );
